@@ -17,36 +17,25 @@ import os
 from producer_interface import *
 
 class mqProducer(mqProducerInterface):
-    def __init__(self, exchange_name: str) -> None:
-        # Save parameters to class variables
+    def __init__(self, routing_key: str, exchange_name: str) -> None:
         self.m_routing_key = routing_key
         self.m_exchange_name = exchange_name
-        # Call setupRMQConnection
         self.setupRMQConnection()
-        pass
 
     def setupRMQConnection(self) -> None:
         # Set-up Connection to RabbitMQ service
         con_params = pika.URLParameters(os.environ["AMQP_URL"])
-        self.m_connection = pika.BlockingConnection(parameters=con_params)
+        self.m_connection = pika.BlockingConnection(parameters = con_params)
         # Establish Channel
         self.m_channel = self.m_connection.channel()
-        # Create the topic exchange if not already present
+        # Create the exchange if not already present
         self.m_channel.exchange_declare(self.m_exchange_name)
-        pass
 
     def publishOrder(self, message: str) -> None:
-        # Create Appropiate Topic String
-        channel.exchange_declare(exchange="Exchange Name", exchange_type="topic")
-        # Send serialized message or String
-        properties = pika.BasicProperties(delivery_mode=2)
-        self.m_channel.basic_publish(exchange=self.m_exchange_name,
-                                routing_key=self.m)
-        if __name__ == "__main __":
-            print(" [x] Sent %r" % message)
-        # Print Confirmation
-        print('Published Message:', message)
-        # Close channel and connection
+        # Basic Publish to Exchange
+        self.m_channel.basic_publish(exchange = self.m_exchange_name, routing_key = self.m_routing_key,
+                                     body = message)
+        # Close Channel
         self.m_channel.close()
+        # Close Connection
         self.m_connection.close()
-        pass
